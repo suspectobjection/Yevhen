@@ -1,55 +1,357 @@
 <!DOCTYPE html>
-<html lang="da">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Yevhen lærer dansk</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yevhen — Дневник датского</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; }
-    nav { background: #333; padding: 10px; }
-    nav a { color: white; margin: 0 15px; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    section { padding: 20px; }
-    h2 { color: #333; }
+    :root{
+      --bg:#0f1220;
+      --card:#151a2e;
+      --accent:#6bd1ff;
+      --accent2:#a27bff;
+      --text:#e8ecf3;
+      --muted:#a7b0c5;
+      --glass:rgba(255,255,255,0.05);
+      --border:rgba(255,255,255,0.12);
+    }
+    /* Фон с мягким переливом */
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #1b2040, transparent),
+        radial-gradient(1000px 500px at 100% 0%, #1a2b49, transparent),
+        linear-gradient(180deg, #0d1020, #0f1220 50%, #111529);
+      min-height:100vh;
+    }
+    /* Глоу-градиентная лента сверху */
+    .glow {
+      position: fixed; inset: -200px;
+      background: radial-gradient(700px 300px at 30% -20%, rgba(107,209,255,0.25), transparent),
+                  radial-gradient(700px 300px at 80% -20%, rgba(162,123,255,0.25), transparent);
+      filter: blur(50px);
+      pointer-events:none;
+      z-index:0;
+      animation: flow 12s infinite alternate ease-in-out;
+    }
+    @keyframes flow {
+      0% {transform: translateY(0) scale(1);}
+      100% {transform: translateY(10px) scale(1.02);}
+    }
+
+    /* Контейнер */
+    .wrap{ 
+      position:relative; 
+      z-index:1; 
+      padding:20px; 
+      max-width:760px; 
+      margin:0 auto; 
+    }
+
+    /* Хедер с стеклянным блюром */
+    .header {
+      position:sticky; top:0; z-index:5;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(21,26,46,0.7), rgba(21,26,46,0.35));
+      border-bottom:1px solid var(--border);
+      padding:12px 20px;
+    }
+    .title {
+      display:flex; align-items:center; gap:10px; 
+      font-weight:700; letter-spacing:0.2px;
+    }
+    .badge {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#0f1220; font-weight:700; font-size:12px;
+      padding:6px 10px; border-radius:999px;
+      box-shadow: 0 0 20px rgba(107,209,255,0.35);
+    }
+
+    /* Панель дней (кнопки-аккордеоны) */
+    .days {
+      display:flex; flex-direction:column; gap:12px; margin-top:16px;
+    }
+    .day {
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius:16px; overflow:hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .day-header{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:14px 16px;
+      cursor:pointer; user-select:none;
+    }
+    .day-left{ display:flex; align-items:center; gap:12px; }
+    .day-num{
+      width:34px; height:34px; 
+      display:flex; align-items:center; justify-content:center;
+      border-radius:8px;
+      background: linear-gradient(135deg, rgba(107,209,255,0.25), rgba(162,123,255,0.25));
+      color:#fff; font-weight:700;
+      box-shadow: inset 0 0 12px rgba(255,255,255,0.08);
+      backdrop-filter: blur(6px);
+    }
+    .day-date{ color:var(--muted); font-size:14px; }
+    .chev{
+      width:26px; height:26px; border-radius:999px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,0.06);
+      transition: transform .25s ease;
+    }
+    .day.open .chev{ transform: rotate(180deg); }
+
+    /* Контент дня */
+    .day-body{
+      max-height:0; overflow:hidden;
+      transition: max-height .35s ease;
+    }
+    .day.open .day-body{ max-height: 1000px; }
+
+    /* Ряд секций: слова → предложения → повторение → темы */
+    .row{
+      display:grid; grid-template-columns:1fr; gap:12px; padding:12px 16px 18px;
+    }
+    @media (min-width: 560px){
+      .row{ grid-template-columns: 1fr; } /* оставляем одну колонку для удобства на телефоне */
+    }
+
+    .card{
+      position:relative;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+      border-radius:14px; padding:12px;
+      backdrop-filter: blur(8px);
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-1px;
+      border-radius:14px;
+      background: radial-gradient(400px 120px at 20% 0%, rgba(107,209,255,0.18), transparent),
+                  radial-gradient(400px 120px at 80% 0%, rgba(162,123,255,0.16), transparent);
+      filter: blur(20px);
+      z-index:-1;
+    }
+    .card h3{
+      margin:4px 0 8px; font-size:15px; color:#fff; letter-spacing:0.2px;
+    }
+    .list{ 
+      display:flex; flex-direction:column; gap:6px; 
+      font-size:14px; color:var(--text);
+    }
+    .item{ 
+      display:flex; align-items:baseline; gap:8px;
+      padding:6px; border-radius:8px;
+      background: rgba(255,255,255,0.04);
+    }
+    .tag{ 
+      font-weight:700; color:var(--accent);
+    }
+    .muted{ color:var(--muted); font-size:13px; }
+
+    /* Микроанимации при раскрытии */
+    .day.open .card{ animation: pop .25s ease both; }
+    @keyframes pop {
+      from { transform: translateY(6px); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+
+    /* Кнопка добавления (будущее расширение) */
+    .actions {
+      display:flex; gap:10px; padding:10px 16px 18px;
+    }
+    .btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#0f1220; border:none; border-radius:10px;
+      padding:10px 12px; font-weight:700; cursor:pointer;
+      box-shadow: 0 12px 24px rgba(107,209,255,0.35);
+    }
+    .btn:active { transform: translateY(1px); }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="#today">Сегодня</a>
-    <a href="#exams">Экзамены</a>
-    <a href="#review">Повторение</a>
-    <a href="#newwords">Новые слова</a>
-    <a href="#archive">Архив</a>
-  </nav>
+  <div class="glow"></div>
 
-  <section id="today">
-    <h2>Сегодня</h2>
-    <p>Jeg studerer på universitetet. Новые слова: universitet, kollega, eksamen.</p>
-  </section>
+  <div class="header">
+    <div class="title">
+      <div class="badge">Yevhen</div>
+      <div>Дневник датского: слова, предложения, повторение, темы</div>
+    </div>
+  </div>
 
-  <section id="exams">
-    <h2>Экзамены</h2>
-    <p>Eksamen i matematik — 15 januar.</p>
-  </section>
+    <div class="wrap">
+      <div class="days" id="days">
+        <!-- День 1 -->
+        <div class="day">
+          <div class="day-header">
+            <div class="day-left">
+              <div class="day-num">1</div>
+              <div>
+                <div><strong>Сегодня</strong></div>
+                <div class="day-date">04 декабря 2025</div>
+              </div>
+            </div>
+            <div class="chev">⌄</div>
+          </div>
+          <div class="day-body">
+            <div class="row">
+              <!-- Новые слова -->
+              <div class="card">
+                <h3>Новые слова</h3>
+                <div class="list">
+                  <div class="item"><span class="tag">universitet</span> — университет</div>
+                  <div class="item"><span class="tag">kollega</span> — коллега</div>
+                  <div class="item"><span class="tag">eksamen</span> — экзамен</div>
+                  <div class="item"><span class="tag">opgave</span> — задание</div>
+                </div>
+              </div>
+              <!-- Предложения -->
+              <div class="card">
+                <h3>Предложения</h3>
+                <div class="list">
+                  <div class="item"><span class="tag">Jeg studerer på universitetet.</span> — Я учусь в университете.</div>
+                  <div class="item"><span class="tag">Jeg bor i en lejlighed med min kollega.</span> — Я живу с коллегой.</div>
+                  <div class="item"><span class="tag">Jeg har en eksamen i morgen.</span> — У меня завтра экзамен.</div>
+                </div>
+              </div>
+              <!-- Повторение -->
+              <div class="card">
+                <h3>Повторение</h3>
+                <div class="list">
+                  <div class="item"><span class="tag">arbejdstid</span> — рабочее время</div>
+                  <div class="item"><span class="tag">karakter</span> — оценка</div>
+                </div>
+              </div>
+              <!-- Темы -->
+              <div class="card">
+                <h3>Темы</h3>
+                <div class="list">
+                  <div class="item"><span class="tag">Skole og arbejde</span> — школа и работа</div>
+                  <div class="item"><span class="tag">Eksamensforberedelse</span> — подготовка к экзаменам</div>
+                </div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn" onclick="addDay()">Добавить следующий день</button>
+            </div>
+          </div>
+        </div>
 
-  <section id="review">
-    <h2>Повторение</h2>
-    <ul>
-      <li>opgave — задание</li>
-      <li>ferie — отпуск</li>
-    </ul>
-  </section>
+        <!-- День 2 (пример пустого дня для шаблона) -->
+        <div class="day">
+          <div class="day-header">
+            <div class="day-left">
+              <div class="day-num">2</div>
+              <div>
+                <div><strong>Сегодня</strong></div>
+                <div class="day-date">05 декабря 2025</div>
+              </div>
+            </div>
+            <div class="chev">⌄</div>
+          </div>
+          <div class="day-body">
+            <div class="row">
+              <div class="card">
+                <h3>Новые слова</h3>
+                <div class="list muted">
+                  <div class="item">Добавь новые слова…</div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Предложения</h3>
+                <div class="list muted">
+                  <div class="item">Напиши 2–3 предложения…</div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Повторение</h3>
+                <div class="list muted">
+                  <div class="item">Укажи, что повторял…</div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Темы</h3>
+                <div class="list muted">
+                  <div class="item">Темы дня…</div>
+                </div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn" onclick="addDay()">Добавить следующий день</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <section id="newwords">
-    <h2>Новые слова</h2>
-    <ul>
-      <li>arbejdstid — рабочее время</li>
-      <li>karakter — оценка</li>
-    </ul>
-  </section>
+  <script>
+    // Аккордеон: раскрытие/закрытие дней
+    document.querySelectorAll('.day').forEach(day=>{
+      const header = day.querySelector('.day-header');
+      header.addEventListener('click', ()=>{
+        day.classList.toggle('open');
+      });
+    });
 
-  <section id="archive">
-    <h2>Архив</h2>
-    <p>Записи по дням: 3 декабря, 4 декабря...</p>
-  </section>
+    // Добавление нового дня (число по порядку)
+    function addDay(){
+      const daysWrap = document.getElementById('days');
+      const count = daysWrap.querySelectorAll('.day').length + 1;
+      const day = document.createElement('div');
+      day.className = 'day';
+      day.innerHTML = `
+        <div class="day-header">
+          <div class="day-left">
+            <div class="day-num">${count}</div>
+            <div>
+              <div><strong>Сегодня</strong></div>
+              <div class="day-date">Добавь дату…</div>
+            </div>
+          </div>
+          <div class="chev">⌄</div>
+        </div>
+        <div class="day-body">
+          <div class="row">
+            <div class="card">
+              <h3>Новые слова</h3>
+              <div class="list muted">
+                <div class="item">universitet — университет</div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Предложения</h3>
+              <div class="list muted">
+                <div class="item">Jeg studerer på universitetet.</div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Повторение</h3>
+              <div class="list muted">
+                <div class="item">Добавь, что повторял…</div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Темы</h3>
+              <div class="list muted">
+                <div class="item">Добавь темы дня…</div>
+              </div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" onclick="addDay()">Добавить следующий день</button>
+          </div>
+        </div>
+      `;
+      daysWrap.appendChild(day);
+      // подключаем аккордеон к новому дню
+      day.querySelector('.day-header').addEventListener('click', ()=> day.classList.toggle('open'));
+      // автоматически раскрыть созданный день
+      day.classList.add('open');
+      // проскроллить к нему
+      day.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  </script>
 </body>
 </html>
